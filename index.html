@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Potion Cauldrons: 5 teams</title>
+<style>
+:root{--ground:#17131c;--case:#2f2639;--case-dk:#201a28;--label:#ece4cf;--led:#ff5a2f;--wire:#e8710a;--ok:#43c06a;--ink:#ece4cf;--mute:#a9a590;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#17131c;--case:#2f2639;--ink:#ece4cf}}
+:root[data-theme="dark"]{--ground:#17131c;--case:#2f2639;--ink:#ece4cf}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:transparent;color:var(--ink);font-family:"Trebuchet MS",Verdana,sans-serif;overflow-x:hidden}
+@keyframes flash{0%{background:#4a1208}100%{background:var(--ground)}}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:3px solid var(--case-dk)}
+h1{font:700 19px "Courier New",monospace;margin:0;color:var(--label)}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px;color:var(--mute)}
+.ctl input{width:64px;font:700 16px "Courier New",monospace;padding:6px;border-radius:6px;border:2px solid var(--case-dk)}
+button{font:700 15px "Courier New",monospace;min-height:40px;padding:0 14px;border-radius:8px;border:3px solid var(--case-dk);background:var(--label);color:#1b1b17;cursor:pointer}
+button:active{transform:translateY(2px)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--wire);outline-offset:2px}
+button.pri{background:var(--wire);color:#fff;border-color:#8a3f00}
+button.ghost{background:transparent;color:var(--mute);border:1px solid #6b6a5a;min-height:32px;font-size:12px}
+#grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:18px;padding:18px 22px}
+.bomb{background:rgba(47,38,57,.8);backdrop-filter:blur(2px);border:3px solid var(--case-dk);border-radius:10px;padding:12px;box-shadow:inset 0 0 0 2px #0003;display:flex;flex-direction:column;gap:8px}
+.name{background:transparent;border:0;border-bottom:2px dashed #0006;color:var(--label);font:700 18px "Courier New",monospace;width:100%;padding:2px 0}
+.pot{width:100%;height:auto;display:block}
+.led{font:700 54px "Courier New",monospace;fill:#8dff6b;text-anchor:middle;filter:drop-shadow(0 0 6px #6bd44b)}
+.led.low{fill:#ff5a2f;filter:drop-shadow(0 0 6px #ff5a2f);animation:blink 1s steps(2) infinite}
+.led.idle{fill:#5f7a58;filter:none}
+@keyframes blink{50%{opacity:.35}}
+.iron{fill:#2b2b30;stroke:#4b4b53;stroke-width:3}
+.rim{fill:#18181b;stroke:#55555e;stroke-width:3}
+.liquid{fill:#6bd44b}
+.bub{fill:#b8f59f;opacity:.9;animation:rise 2.4s ease-in infinite}
+.bub:nth-of-type(2){animation-delay:.8s}.bub:nth-of-type(3){animation-delay:1.5s}
+@keyframes rise{0%{transform:translateY(8px);opacity:0}30%{opacity:.9}100%{transform:translateY(-22px);opacity:0}}
+.fl{fill:#ff9a1f;transform-box:fill-box;transform-origin:50% 100%;animation:flick .7s ease-in-out infinite alternate}
+.fl.b{fill:#ffd23f;animation-delay:.25s}.fl.c{animation-delay:.45s}
+@keyframes flick{from{transform:scaleY(.8)}to{transform:scaleY(1.1)}}
+.flames{transition:opacity .4s}
+.bomb[data-run="0"] .flames,.bomb[data-run="0"] .bub{opacity:.12;animation:none}
+.bomb[data-res="dead"] .liquid{fill:#d9432b}
+.bomb[data-res="dead"] .fl{fill:#ff3b1f}
+.bomb[data-res="win"] .liquid{fill:#f5c542}
+.bomb[data-res="win"] .flames{opacity:.15}
+.lamps{display:flex;justify-content:space-between;gap:4px}
+.lamp{flex:1;text-align:center;font:700 10px "Courier New",monospace;color:var(--label)}
+.lamp i{display:block;width:14px;height:14px;border-radius:50%;margin:0 auto 3px;background:#2b2d24;border:2px solid #000}
+.lamp.on i{background:var(--ok);box-shadow:0 0 8px var(--ok)}
+.lamp.now i{background:var(--wire);box-shadow:0 0 6px var(--wire)}
+.status{margin:0;font:700 13px "Courier New",monospace;color:var(--label);text-align:center}
+.entry{display:flex;flex-direction:column;gap:8px}
+.disp{display:flex;gap:8px;justify-content:center}
+.disp div{width:48px;height:54px;background:var(--label);color:#111;border-radius:6px;font:700 32px/54px "Courier New",monospace;text-align:center;border:3px solid #0006}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.pad button{min-height:46px;font-size:22px;padding:0}
+.pad button.clr{background:#b9b29a;font-size:15px}
+.pad button.ent{background:var(--wire);color:#fff;border-color:#8a3f00;font-size:15px}
+.banner{margin:0;min-height:44px;padding:8px 10px;border-radius:6px;font-size:14px;line-height:1.3;background:#0003;color:var(--label)}
+.banner.ok{background:#1f5a32;color:#fff}
+.banner.boom,.banner.dead{background:#7a1a12;color:#fff}
+.banner.win{background:#1f5a32;color:#fff;font-weight:700}
+.mini{display:flex;gap:8px;justify-content:space-between}
+.shake{animation:shake .4s}
+@keyframes shake{20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+body.solo header .all,body.solo .bomb.hide{display:none}
+body.solo #grid{grid-template-columns:minmax(0,520px);justify-content:center}
+@media (prefers-reduced-motion:reduce){.led.low,.shake,.bub,.fl,.fly,.f,body.flash #flash{animation:none}}
+#bg{position:fixed;inset:0;z-index:-1;pointer-events:none;background:#090514}
+#bg svg{width:100%;height:100%;display:block}
+#bg .fly use{fill:#05030a}
+.fly{animation:fly 34s linear infinite}
+.fly.f2{animation-duration:46s;animation-delay:-12s}.fly.f3{animation-duration:40s;animation-delay:-22s}.fly.f4{animation-duration:52s;animation-delay:-30s}
+@keyframes fly{0%{transform:translate(-160px,0)}25%{transform:translate(260px,-26px)}50%{transform:translate(620px,10px)}75%{transform:translate(940px,-24px)}100%{transform:translate(1360px,0)}}
+.f{animation:drift 30s ease-in-out infinite alternate}.f.b{animation-duration:38s}.f.c{animation-duration:26s}
+@keyframes drift{from{transform:translateX(-80px)}to{transform:translateX(80px)}}
+#flash{position:fixed;inset:0;background:#c0220f;opacity:0;pointer-events:none;z-index:6}
+body.flash #flash{animation:flashov .5s}
+@keyframes flashov{0%{opacity:.45}100%{opacity:0}}
+header{background:#17131ccc;backdrop-filter:blur(3px)}
+</style>
+</head>
+<body>
+<div id="bg" aria-hidden="true"><svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#090514"/><stop offset=".6" stop-color="#1d1033"/><stop offset="1" stop-color="#4a2a55"/></linearGradient>
+<radialGradient id="glow"><stop offset="0" stop-color="#f6f0c8" stop-opacity=".55"/><stop offset="1" stop-color="#f6f0c8" stop-opacity="0"/></radialGradient>
+<filter id="blur"><feGaussianBlur stdDeviation="14"/></filter>
+<symbol id="bat" viewBox="-20 -10 40 20"><path d="M0 0Q-6-8-18-6Q-12-2-14 4Q-8 0-5 6Q-2 2 0 5Q2 2 5 6Q8 0 14 4Q12-2 18-6Q6-8 0 0Z"/></symbol>
+</defs>
+<rect width="1200" height="800" fill="url(#sky)"/>
+<circle cx="80" cy="60" r="1.4" fill="#fff" opacity="0.80"/><circle cx="210" cy="130" r="1.0" fill="#fff" opacity="0.60"/><circle cx="330" cy="40" r="1.6" fill="#fff" opacity="0.90"/><circle cx="470" cy="110" r="1.0" fill="#fff" opacity="0.50"/><circle cx="590" cy="50" r="1.3" fill="#fff" opacity="0.80"/><circle cx="700" cy="140" r="1.0" fill="#fff" opacity="0.60"/><circle cx="760" cy="70" r="1.5" fill="#fff" opacity="0.90"/><circle cx="1080" cy="60" r="1.2" fill="#fff" opacity="0.70"/><circle cx="1150" cy="150" r="1.0" fill="#fff" opacity="0.60"/><circle cx="150" cy="230" r="1.2" fill="#fff" opacity="0.60"/><circle cx="420" cy="210" r="1.0" fill="#fff" opacity="0.50"/><circle cx="640" cy="230" r="1.1" fill="#fff" opacity="0.50"/><circle cx="1010" cy="270" r="1.0" fill="#fff" opacity="0.50"/><circle cx="40" cy="160" r="1.0" fill="#fff" opacity="0.60"/><circle cx="540" cy="160" r="1.0" fill="#fff" opacity="0.50"/><circle cx="830" cy="200" r="1.2" fill="#fff" opacity="0.60"/>
+<circle cx="940" cy="170" r="200" fill="url(#glow)"/>
+<circle cx="940" cy="170" r="70" fill="#f3edcf"/>
+<circle cx="918" cy="150" r="12" fill="#d9d1ac"/><circle cx="962" cy="188" r="16" fill="#d9d1ac"/><circle cx="946" cy="130" r="7" fill="#d9d1ac"/>
+<g fill="#07040d">
+<path d="M0 640Q200 560 420 600T800 590T1200 610V800H0Z"/>
+<path d="M300 650Q440 520 560 560Q640 590 760 650Z" fill="#0c0716"/>
+<g fill="#050309">
+<rect x="400" y="470" width="150" height="130"/>
+<rect x="540" y="430" width="70" height="170"/>
+<polygon points="390,470 475,410 560,470"/>
+<polygon points="535,430 575,360 615,430"/>
+<rect x="568" y="335" width="14" height="30"/>
+<rect x="430" y="425" width="16" height="45"/>
+</g>
+<g fill="#ffb347">
+<rect x="425" y="505" width="20" height="28" opacity=".95"/><rect x="480" y="505" width="20" height="28" opacity=".6"/>
+<rect x="562" y="470" width="18" height="26" opacity=".95"/><rect x="450" y="560" width="18" height="26" opacity=".5"/>
+</g>
+<path d="M60 800L70 520L52 470M70 560L120 500L150 440M70 600L20 540L0 500M76 500L100 420M120 500L170 490" stroke="#050309" stroke-width="12" stroke-linecap="round" fill="none"/>
+<path d="M1130 800L1120 540L1150 470M1122 580L1070 520L1040 440M1125 620L1180 560M1120 520L1090 430M1070 520L1020 515" stroke="#050309" stroke-width="12" stroke-linecap="round" fill="none"/>
+</g>
+<g class="fly f1"><use href="#bat" x="220" y="200" width="44" height="22"/></g><g class="fly f2"><use href="#bat" x="700" y="120" width="38" height="19"/></g><g class="fly f3"><use href="#bat" x="420" y="330" width="32" height="16"/></g><g class="fly f4"><use href="#bat" x="1000" y="330" width="36" height="18"/></g>
+<g class="fog" filter="url(#blur)"><ellipse class="f a" cx="300" cy="700" rx="360" ry="40" fill="#cdbfe0" opacity=".22"/><ellipse class="f b" cx="900" cy="730" rx="420" ry="44" fill="#cdbfe0" opacity=".2"/><ellipse class="f c" cx="600" cy="660" rx="300" ry="28" fill="#cdbfe0" opacity=".15"/></g>
+</svg></div><div id="flash" aria-hidden="true"></div>
+<header>
+  <h1>Potion Cauldrons</h1>
+  <div class="ctl">
+    <span class="all"><label for="mins">Minutes</label> <input id="mins" type="number" min="5" max="90" value="35"></span>
+    <button class="pri all" id="armall" type="button">Arm all bombs</button>
+    <button id="mute" type="button">Sound: on</button>
+    <button class="ghost all" id="resetall" type="button">Reset all</button>
+  </div>
+</header>
+<main id="grid"></main>
+
+<script>
+(function(){
+var N=5,KEY="potionbombs.v1";
+var STAGES=[
+ {n:"Training",h:"2c43b108",say:"Training done! Open ENVELOPE 1 (Phase 1).",ask:"Enter the training code."},
+ {n:"Phase 1",h:"1c6200c6",say:"Phase 1 unlocked! Open ENVELOPE 2.",ask:"Phase 1: enter the 4-digit code."},
+ {n:"Phase 2",h:"eb1d5497",say:"Phase 2 unlocked! Open ENVELOPE 3.",ask:"Phase 2: enter the 4-digit code."},
+ {n:"Phase 3",h:"bae9476b",say:"Phase 3 unlocked! Open ENVELOPE 4.",ask:"Phase 3: enter the 4-digit code."},
+ {n:"Phase 4",h:"6139b6cf",say:"Phase 4 unlocked! Now find the final code: first digit of each phase code.",ask:"Phase 4: enter the 4-digit code."},
+ {n:"Final wire",h:"1eb5d97f",say:"",ask:"Cut the right wire: enter the final code."}
+];
+var $=function(i){return document.getElementById(i)};
+var muted=false,ac=null,S=load()||{mins:35,b:[]};
+for(var k=0;k<N;k++){if(!S.b[k])S.b[k]={name:"Team "+(k+1),end:null,stage:0,res:null,msg:null,left:0}}
+var m=/team=([1-5])/.exec(location.hash||""),solo=m?parseInt(m[1],10)-1:-1;
+if(solo>=0)document.body.classList.add("solo");
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function load(){try{var v=localStorage.getItem(KEY);return v?JSON.parse(v):null}catch(e){return null}}
+function fnv(s){var x=0x811c9dc5;for(var i=0;i<s.length;i++){x^=s.charCodeAt(i);x=Math.imul(x,0x01000193)>>>0}return("00000000"+x.toString(16)).slice(-8)}
+function fmt(ms){var s=Math.ceil(ms/1000),mm=Math.floor(s/60);s=s%60;return(mm<10?"0":"")+mm+":"+(s<10?"0":"")+s}
+function left(b){return Math.max(0,b.end-Date.now())}
+function running(b){return b.end&&!b.res}
+
+/* sound */
+function ctx(){if(!ac){try{ac=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(ac&&ac.state==="suspended")ac.resume();return ac}
+function beep(f,d,t,v,t0){var a=ctx();if(!a||muted)return;var o=a.createOscillator(),g=a.createGain();o.type=t||"square";o.frequency.value=f;var T=a.currentTime+(t0||0);g.gain.setValueAtTime(v||.08,T);g.gain.exponentialRampToValueAtTime(.0001,T+d);o.connect(g);g.connect(a.destination);o.start(T);o.stop(T+d)}
+function boomSound(){var a=ctx();if(!a||muted)return;var n=a.sampleRate*1.2,bf=a.createBuffer(1,n,a.sampleRate),d=bf.getChannelData(0);for(var i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,2);var s=a.createBufferSource();s.buffer=bf;var g=a.createGain();g.gain.value=.5;s.connect(g);g.connect(a.destination);s.start()}
+
+/* build */
+var grid=$("grid");
+for(var i=0;i<N;i++){
+  var c=document.createElement("article");c.className="bomb"+(solo>=0&&solo!==i?" hide":"");c.id="b"+i;
+  c.innerHTML='<input class="name" aria-label="Team name" maxlength="20">'+
+   '<svg class="pot" viewBox="0 0 300 215" role="img" aria-label="Cauldron">'+'<g class="flames"><path class="fl" d="M95 213 Q80 190 98 172 Q102 192 114 196 Q110 180 124 168 Q134 192 130 213Z"/>'+'<path class="fl b" d="M140 213 Q128 188 146 168 Q152 190 166 192 Q164 178 176 166 Q188 192 180 213Z"/>'+'<path class="fl c" d="M185 213 Q176 194 190 180 Q196 194 206 196 Q204 186 214 176 Q222 196 214 213Z"/></g>'+'<path class="iron" d="M78 156 L66 176 L90 176 L98 160Z M222 156 L234 176 L210 176 L202 160Z"/>'+'<path class="iron" d="M44 80 Q38 168 108 168 L192 168 Q262 168 256 80Z"/>'+'<path class="iron" d="M44 92 Q22 92 24 108 Q26 122 46 118 M256 92 Q278 92 276 108 Q274 122 254 118" fill="none"/>'+'<ellipse class="rim" cx="150" cy="80" rx="110" ry="16"/>'+'<ellipse class="liquid" cx="150" cy="80" rx="98" ry="10"/>'+'<circle class="bub" cx="112" cy="76" r="6"/><circle class="bub" cx="152" cy="72" r="8"/><circle class="bub" cx="190" cy="77" r="5"/>'+'<rect x="66" y="104" width="168" height="58" rx="8" fill="#0d0a12" opacity=".88"/>'+'<text class="led idle" x="150" y="148">35:00</text></svg><div class="lamps"></div>'+
+   '<p class="status"></p>'+
+   '<div class="entry"><div class="disp"></div><div class="pad"><button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button><button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button><button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button><button type="button" data-k="C" class="clr">Clear</button><button type="button" data-k="0">0</button><button type="button" data-k="E" class="ent">Enter</button></div></div>'+
+   '<p class="banner" role="status"></p>'+
+   '<div class="mini"><button class="pri arm" type="button">Arm bomb</button><button class="ghost rst" type="button">Reset</button></div>';
+  grid.appendChild(c);
+}
+grid.addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;var a=e.target.closest(".bomb"),i=+a.id.slice(1);
+  if(b.dataset.k)press(i,b.dataset.k);
+  else if(b.classList.contains("arm"))arm(i);
+  else if(b.classList.contains("rst"))reset2(i,b);
+});
+grid.addEventListener("input",function(e){
+  var t=e.target,i=+t.closest(".bomb").id.slice(1);
+  if(t.classList.contains("name")){S.b[i].name=t.value;save()}
+});
+
+function minsVal(){return Math.min(90,Math.max(5,parseInt($("mins").value,10)||35))}
+function arm(i){var b=S.b[i];if(b.end)return;S.mins=minsVal();b.end=Date.now()+S.mins*60000;b.stage=0;b.res=null;b.msg={cls:"",text:"Bomb armed. Good luck!"};ctx();beep(440,.2,"triangle",.1);save();draw(i)}
+function reset2(i,btn){
+  if(!btn._a){btn._a=1;btn.textContent="Sure?";setTimeout(function(){btn._a=0;btn.textContent="Reset"},3000);return}
+  S.b[i]={name:S.b[i].name,end:null,stage:0,res:null,msg:null,left:0};save();draw(i);
+}
+$("armall").onclick=function(){for(var i=0;i<N;i++)arm(i)};
+$("mins").value=S.mins;
+$("mins").onchange=function(){S.mins=minsVal();$("mins").value=S.mins;save();drawAll()};
+$("mute").onclick=function(){muted=!muted;this.textContent="Sound: "+(muted?"off":"on")};
+var ra=0;$("resetall").onclick=function(){
+  var b=this;if(!ra){ra=1;b.textContent="Sure? Tap again";setTimeout(function(){ra=0;b.textContent="Reset all"},3000);return}
+  for(var i=0;i<N;i++)S.b[i]={name:S.b[i].name,end:null,stage:0,res:null,msg:null,left:0};save();drawAll();ra=0;b.textContent="Reset all";
+};
+
+/* keypad */
+var buf=[];
+function dispDraw(i){var h="",v=buf[i]||"";for(var k=0;k<4;k++)h+="<div>"+(v[k]||"")+"</div>";$("b"+i).querySelector(".disp").innerHTML=h}
+function press(i,k){
+  var b=S.b[i];if(!running(b))return;ctx();
+  if(k==="C"){buf[i]="";beep(500,.05,"square",.06)}
+  else if(k==="E"){submit(i);return}
+  else if((buf[i]||"").length<4){buf[i]=(buf[i]||"")+k;beep(800,.04,"square",.05)}
+  dispDraw(i);
+}
+/* logic */
+function submit(i){
+  var b=S.b[i];if(!running(b))return;var el=$("b"+i),v=buf[i]||"";
+  if(v.length<4){b.msg={cls:"boom",text:"Enter all 4 digits."};beep(300,.15,"sawtooth",.06);draw(i);return}
+  var st=STAGES[b.stage];buf[i]="";
+  if(fnv("pb26:"+v)===st.h){
+    beep(660,.12,"triangle",.12);beep(880,.18,"triangle",.12,.13);
+    var done=b.stage===5;b.stage++;
+    if(done){b.res="win";b.left=left(b);b.msg={cls:"win",text:"Bomb disarmed! Time left "+fmt(b.left)+". Tell your teacher."}}
+    else b.msg={cls:"ok",text:st.say};
+  }else{
+    b.end-=60000;beep(150,.4,"sawtooth",.15);
+    b.msg={cls:"boom",text:"Boom! Wrong code. One minute lost."};
+    el.classList.remove("shake");void el.offsetWidth;el.classList.add("shake");
+    document.body.classList.remove("flash");void document.body.offsetWidth;document.body.classList.add("flash");
+    if(left(b)<=0)explode(i);
+  }
+  save();draw(i);
+}
+function explode(i){var b=S.b[i];b.res="dead";b.msg={cls:"dead",text:"Boom! Time is up. Tell your teacher."};boomSound();save();draw(i)}
+
+/* drawing */
+function draw(i){
+  dispDraw(i);var b=S.b[i],el=$("b"+i),led=el.querySelector(".led"),nm=el.querySelector(".name");
+  if(document.activeElement!==nm)nm.value=b.name;
+  var h="";STAGES.forEach(function(s,k){h+='<div class="lamp'+(k<b.stage?" on":(k===b.stage&&running(b)?" now":""))+'"><i></i>'+(k===5?"Final":(k===0?"Train":"P"+k))+'</div>'});
+  el.querySelector(".lamps").innerHTML=h;
+  var l=running(b)?left(b):(b.res==="win"?b.left:(b.res==="dead"?0:S.mins*60000));
+  led.textContent=fmt(l);led.classList.toggle("idle",!b.end);led.classList.toggle("low",running(b)&&l<60000);
+  el.querySelector(".status").textContent=running(b)?STAGES[b.stage].ask:(b.res==="win"?"Disarmed":(b.res==="dead"?"Exploded":"Not armed"));
+  el.querySelector(".entry").hidden=!running(b);el.dataset.run=running(b)?1:0;el.dataset.res=b.res||"";
+  var ban=el.querySelector(".banner");ban.className="banner "+(b.msg?b.msg.cls:"");ban.textContent=b.msg?b.msg.text:"Press Arm bomb to start.";
+  el.querySelector(".arm").hidden=!!b.end;
+}
+function drawAll(){for(var i=0;i<N;i++)draw(i)}
+function tick(){
+  var any=false,min=1e12;
+  for(var i=0;i<N;i++){var b=S.b[i];if(!running(b))continue;
+    var l=left(b);if(l<=0){explode(i);continue}
+    any=true;if(l<min)min=l;
+    var led=$("b"+i).querySelector(".led");led.textContent=fmt(l);led.classList.toggle("low",l<60000)}
+  if(any)beep(min<10000?1500:1000,.04,"square",min<60000?.09:.04);
+}
+drawAll();
+for(var j=0;j<N;j++){if(running(S.b[j])&&left(S.b[j])<=0)explode(j)}
+setInterval(tick,1000);
+})();
+</script>
+</body>
+</html>
